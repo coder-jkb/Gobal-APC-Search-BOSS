@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APC Globe Test</title>
+    <script src="https://unpkg.com/globe.gl"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+        }
+
+        #globe {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .main-title-container {
+            position: fixed;
+            top: 24px;
+            left: 30px;
+            z-index: 9999;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .main-title {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.4));
+            line-height: 1;
+        }
+
+        .main-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #38bdf8;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .pin {
+            width: 18px;
+            height: 18px;
+            background: red;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            border: 2px solid white;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            animation: pulse 1.5s infinite;
+            pointer-events: auto;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.6);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+            }
+        }
+
+        #popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            background: rgba(25, 25, 30, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            z-index: 9999;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            width: 500px;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        #popup.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .card-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.2s ease, transform 0.2s ease;
+            line-height: 1;
+        }
+
+        .card-close:hover {
+            color: #fff;
+            transform: rotate(90deg);
+        }
+
+        .card-content {
+            display: flex;
+            gap: 20px;
+            padding: 24px;
+        }
+
+        .card-image-container {
+            flex-shrink: 0;
+            width: 140px;
+            height: 140px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .card-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            margin: 0 0 4px 0;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card-subtitle {
+            margin: 0 0 12px 0;
+            font-size: 0.95rem;
+            color: #aaa;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-body {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .card-body p {
+            margin: 0 0 16px 0;
+        }
+
+        .card-info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+
+        .card-info-list li {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 4px;
+        }
+
+        .card-info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .card-info-label {
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .card-info-value {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        #search-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            gap: 10px;
+            background: rgba(25, 25, 30, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 400px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        #search-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            width: 100%;
+            background: rgba(25, 25, 30, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+            flex-direction: column;
+            max-height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+
+        #search-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #search-dropdown::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .dropdown-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
+            text-align: left;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        #search-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            outline: none;
+            padding: 8px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        #search-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        #search-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            color: black;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        #search-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        #zoom-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(25, 25, 30, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            font-size: 14px;
+        }
+
+        #zoom-reset {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        #zoom-reset:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .zoom-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.2s;
+            padding: 0;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media (max-width: 600px) {
+            .main-title-container {
+                top: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                align-items: center;
+                gap: 4px;
+                width: max-content;
+            }
+
+            .main-title {
+                font-size: 1.5rem;
+            }
+
+            .main-subtitle {
+                font-size: 0.7rem;
+            }
+
+            #popup {
+                width: 90%;
+                max-width: 350px;
+            }
+
+            .card-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .card-title {
+                font-size: 1.2rem;
+            }
+
+            #zoom-controls {
+                left: 50%;
+                right: auto;
+                transform: translateX(-50%);
+                bottom: 40px;
+                width: max-content;
+            }
+
+            #search-container {
+                top: 75px;
+                width: 90%;
+            }
+
+            #sidebar {
+                width: 90%;
+                right: 5%;
+                top: 130px;
+                max-height: calc(100vh - 160px);
+            }
+        }
+
+        #sidebar {
+            position: fixed;
+            top: 25%;
+            right: 20px;
+            width: 320px;
+            max-height: calc(100vh - 120px);
+            background: rgba(25, 25, 30, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            font-family: 'Inter', sans-serif;
+            color: white;
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
+            overflow: hidden;
+            height: 75%;
+            z-index: 10000;
+        }
+
+        #sidebar.collapsed {
+            transform: translateX(360px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sidebar-header {
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-toggle-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 20px;
+            transition: color 0.2s;
+        }
+
+        .sidebar-toggle-btn:hover {
+            color: white;
+        }
+
+        .sidebar-content {
+            padding: 10px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .sidebar-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .apc-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .apc-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .apc-item-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .apc-item-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .apc-item-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .apc-item-city {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        #sidebar-floating-toggle {
+            position: fixed;
+            top: 25%;
+            right: -5px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: black;
+            border: none;
+            padding: 10px 15px 10px 20px;
+            border-radius: 30px 0 0 30px;
+            cursor: pointer;
+            z-index: 899;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+
+        #sidebar-floating-toggle:hover {
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-title-container">
+        <h1 class="main-title">BOSS</h1>
+        <span class="main-subtitle">Global ACP Map</span>
+    </div>
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="Search APC's Name, City or Country..." autocomplete="off" />
+        <button id="search-btn">Fly</button>
+        <div id="search-dropdown"></div>
+    </div>
+
+    <div id="zoom-controls">
+        <button id="zoom-out" class="zoom-btn">-</button>
+        <span id="zoom-level">100%</span>
+        <button id="zoom-in" class="zoom-btn">+</button>
+        <button id="zoom-reset">Reset Zoom</button>
+    </div>
+
+    <button id="sidebar-floating-toggle" onclick="toggleSidebar()">All APCs</button>
+
+    <div id="sidebar" class="collapsed">
+        <div class="sidebar-header">
+            <h2>All APCs</h2>
+            <button class="sidebar-toggle-btn" onclick="toggleSidebar()">&times;</button>
+        </div>
+        <div class="sidebar-content" id="apc-list">
+            <!-- Dynamic items go here -->
+        </div>
+    </div>
+
+    <div id="globe"></div>
+
+    <div id="popup">
+        <div class="card-close" onclick="closePopup()">&times;</div>
+        <div class="card-content">
+            <div class="card-image-container">
+                <img id="popup-image" class="card-image"
+                    src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+                    alt="Profile" />
+            </div>
+            <div class="card-details">
+                <h3 id="title" class="card-title"></h3>
+                <h4 id="subtitle" class="card-subtitle"></h4>
+                <div class="card-body">
+                    <p id="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tristique neque eget.
+                    </p>
+                    <ul class="card-info-list">
+                        <li><span class="card-info-label">Qualification</span> <span id="qualification"
+                                class="card-info-value"></span></li>
+                        <li><span class="card-info-label">Profession</span> <span id="profession"
+                                class="card-info-value"></span></li>
+                        <li><span class="card-info-label">Email</span> <span id="email" class="card-info-value"></span>
+                        </li>
+                        <li><span class="card-info-label">Contact</span> <span id="contact"
+                                class="card-info-value"></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const locations = [
+            {
+                lat: 37.0902,
+                lng: -95.7129,
+                title: "John Doe",
+                city: "New York City",
+                country: "USA",
+                description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam id.",
+                qualification: "B.S. Computer Science",
+                profession: "Software Engineer",
+                email: "john.doe@example.com",
+                contact: "+1 234 567 8900",
+                image: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+            },
+            {
+                lat: 40.7128,
+                lng: -74.0060,
+                title: "Jane Smith",
+                city: "Los Angeles",
+                country: "USA",
+                description: "Donec ac elit vehicula, dictum neque ut, pellentesque mi odio.",
+                qualification: "M.S. Data Science",
+                profession: "Data Analyst",
+                email: "jane.smith@example.com",
+                contact: "+1 987 654 3210",
+                image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+            },
+            {
+                lat: 20.5937,
+                lng: 78.9629,
+                title: "Ravi Patel",
+                city: "Mumbai",
+                country: "India",
+                description: "Expert in AI and Machine Learning systems.",
+                qualification: "Ph.D. Artificial Intelligence",
+                profession: "AI Researcher",
+                email: "ravi.patel@example.com",
+                contact: "+91 98765 43210",
+                image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+            },
+            {
+                lat: 51.5074,
+                lng: -0.1278,
+                title: "Emma Watson",
+                city: "London",
+                country: "UK",
+                description: "Specializes in modern responsive web architectures.",
+                qualification: "B.A. Graphic Design",
+                profession: "UI/UX Lead",
+                email: "emma.watson@example.com",
+                contact: "+44 20 7946 0958",
+                image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+            },
+            {
+                lat: 28.6139,
+                lng: 77.2090,
+                title: "Rajesh Patil",
+                city: "Kolhapur",
+                country: "India",
+                description: "Expert in AI and Machine Learning systems.",
+                qualification: "Ph.D. Artificial Intelligence",
+                profession: "AI Researcher",
+                email: "ravi.patel@example.com",
+                contact: "+91 98765 43210",
+                image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+            },
+            {
+                lat: 18.5204,
+                lng: 73.8567,
+                title: "Rohit Kohli",
+                city: "Pune",
+                country: "India",
+                description: "Expert in AI and Machine Learning systems.",
+                qualification: "Ph.D. Artificial Intelligence",
+                profession: "AI Researcher",
+                email: "ravi.patel@example.com",
+                contact: "+91 98765 43210",
+                image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+            },
+            {
+                lat: 15.2854,
+                lng: 74.1245,
+                title: "Sanika Patil",
+                city: "Belgaum",
+                country: "India",
+                description: "Expert in AI and Machine Learning systems.",
+                qualification: "Ph.D. Artificial Intelligence",
+                profession: "AI Researcher",
+                email: "ravi.patel@example.com",
+                contact: "+91 98765 43210",
+                image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
+            }
+        ];
+
+        const isMobile = window.innerWidth < 600;
+        const defaultAltitude = isMobile ? 3.5 : 2.5;
+
+        const globe = Globe()(document.getElementById('globe'))
+            .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+            .htmlElementsData(locations)
+            .htmlElement(d => {
+                const el = document.createElement('div');
+
+                el.className = 'pin';
+
+                // IMPORTANT: stop globe drag when clicking pin
+                el.addEventListener('click', (e) => {
+                    e.stopPropagation();
+
+                    document.getElementById('title').innerText = d.title;
+                    document.getElementById('subtitle').innerText = d.city;
+                    document.getElementById('desc').innerText = d.description;
+                    document.getElementById('qualification').innerText = d.qualification;
+                    document.getElementById('profession').innerText = d.profession;
+                    document.getElementById('email').innerText = d.email;
+                    document.getElementById('contact').innerText = d.contact;
+                    document.getElementById('popup-image').src = d.image;
+
+                    document.getElementById('popup').classList.add('show');
+
+                    globe.pointOfView(
+                        { lat: d.lat, lng: d.lng, altitude: 1.2 },
+                        800
+                    );
+                });
+
+                return el;
+            })
+            .htmlLat(d => d.lat)
+            .htmlLng(d => d.lng)
+            .htmlAltitude(0.01);
+
+        // Initialize position based on device
+        globe.pointOfView({ altitude: defaultAltitude }, 0);
+
+        const controls = globe.controls();
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+
+        // Manage zoom percentage
+        controls.addEventListener('change', () => {
+            const currentAlt = globe.pointOfView().altitude;
+            let zoomPercent = Math.round((defaultAltitude / currentAlt) * 100);
+
+            if (zoomPercent < 10) zoomPercent = 10;
+            if (zoomPercent > 1000) zoomPercent = 1000;
+
+            document.getElementById('zoom-level').innerText = zoomPercent + "%";
+        });
+
+        // Zoom buttons
+        document.getElementById('zoom-in').addEventListener('click', () => {
+            const currentAlt = globe.pointOfView().altitude;
+            globe.pointOfView({ altitude: currentAlt * 0.5 }, 500);
+        });
+
+        document.getElementById('zoom-out').addEventListener('click', () => {
+            const currentAlt = globe.pointOfView().altitude;
+            globe.pointOfView({ altitude: currentAlt * 1.5 }, 500);
+        });
+
+        // Reset Zoom button
+        document.getElementById('zoom-reset').addEventListener('click', () => {
+            closePopup();
+            globe.pointOfView({ altitude: defaultAltitude, lat: 0, lng: 0 }, 1000);
+            controls.autoRotate = true;
+        });
+
+        // Stop rotation when user interacts
+        controls.addEventListener('start', () => {
+            controls.autoRotate = false;
+        });
+
+        function closePopup() {
+            document.getElementById('popup').classList.remove('show');
+        }
+
+        setTimeout(() => {
+            controls.autoRotate = false;
+        }, 5000);
+
+        // Sidebar Logic
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        }
+
+        const apcListEl = document.getElementById('apc-list');
+        locations.forEach((d) => {
+            const item = document.createElement('div');
+            item.className = 'apc-item';
+            item.innerHTML = `
+                <img class="apc-item-img" src="${d.image}" />
+                <div class="apc-item-details">
+                    <span class="apc-item-name">${d.title}</span>
+                    <span class="apc-item-city">${d.city}, ${d.country}</span>
+                </div>
+            `;
+            item.addEventListener('click', () => {
+                controls.autoRotate = false;
+                globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: 1.2 }, 1000);
+
+                setTimeout(() => {
+                    document.getElementById('title').innerText = d.title;
+                    document.getElementById('subtitle').innerText = d.city;
+                    document.getElementById('desc').innerText = d.description;
+                    document.getElementById('qualification').innerText = d.qualification;
+                    document.getElementById('profession').innerText = d.profession;
+                    document.getElementById('email').innerText = d.email;
+                    document.getElementById('contact').innerText = d.contact;
+                    document.getElementById('popup-image').src = d.image;
+                    document.getElementById('popup').classList.add('show');
+                }, 1100);
+
+                if (isMobile) toggleSidebar();
+            });
+            apcListEl.appendChild(item);
+        });
+
+        // Search logic
+        function executeSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            if (!query) return;
+
+            closePopup();
+
+            // First pass: try matching exactly by country
+            const countryMatches = locations.filter(d => d.country && d.country.toLowerCase() === query);
+
+            if (countryMatches.length > 0) {
+                if (countryMatches.length === 1) {
+                    const match = countryMatches[0];
+                    controls.autoRotate = false;
+                    globe.pointOfView({ lat: match.lat, lng: match.lng, altitude: 1.2 }, 1500);
+
+                    setTimeout(() => {
+                        document.getElementById('title').innerText = match.title;
+                        document.getElementById('subtitle').innerText = match.city;
+                        document.getElementById('desc').innerText = match.description;
+                        document.getElementById('qualification').innerText = match.qualification;
+                        document.getElementById('profession').innerText = match.profession;
+                        document.getElementById('email').innerText = match.email;
+                        document.getElementById('contact').innerText = match.contact;
+                        document.getElementById('popup-image').src = match.image;
+                        document.getElementById('popup').classList.add('show');
+                    }, 1600);
+                } else {
+                    // Multiple present - fly to average coordinates, don't open popup
+                    const avgLat = countryMatches.reduce((sum, d) => sum + d.lat, 0) / countryMatches.length;
+                    const avgLng = countryMatches.reduce((sum, d) => sum + d.lng, 0) / countryMatches.length;
+                    controls.autoRotate = false;
+                    globe.pointOfView({ lat: avgLat, lng: avgLng, altitude: 2.0 }, 1500);
+                }
+                return;
+            }
+
+            // Standard pass: name or city or description
+            const match = locations.find(d =>
+                (d.title && d.title.toLowerCase().includes(query)) ||
+                (d.city && d.city.toLowerCase().includes(query)) ||
+                (d.description && d.description.toLowerCase().includes(query))
+            );
+
+            if (match) {
+                controls.autoRotate = false;
+                globe.pointOfView({ lat: match.lat, lng: match.lng, altitude: 1.2 }, 1500);
+
+                setTimeout(() => {
+                    document.getElementById('title').innerText = match.title;
+                    document.getElementById('subtitle').innerText = match.city;
+                    document.getElementById('desc').innerText = match.description;
+                    document.getElementById('qualification').innerText = match.qualification;
+                    document.getElementById('profession').innerText = match.profession;
+                    document.getElementById('email').innerText = match.email;
+                    document.getElementById('contact').innerText = match.contact;
+                    document.getElementById('popup-image').src = match.image;
+                    document.getElementById('popup').classList.add('show');
+                }, 1600);
+            } else {
+                alert("No locations found matching: " + query);
+            }
+        }
+
+        const searchDropdown = document.getElementById('search-dropdown');
+        const searchInput = document.getElementById('search-input');
+
+        document.getElementById('search-btn').addEventListener('click', () => {
+            searchDropdown.style.display = 'none';
+            executeSearch();
+        });
+
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchDropdown.style.display = 'none';
+                executeSearch();
+            }
+        });
+
+        // Debounce logic for dropdown
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func(...args), wait);
+            };
+        }
+
+        const handleInput = debounce((e) => {
+            const query = e.target.value.toLowerCase().trim();
+            if (!query) {
+                searchDropdown.style.display = 'none';
+                return;
+            }
+
+            const matchedCountries = [...new Set(locations
+                .filter(d => d.country && d.country.toLowerCase().includes(query))
+                .map(d => d.country)
+            )];
+
+            const matchedIndividuals = locations.filter(d =>
+                (d.title && d.title.toLowerCase().includes(query)) ||
+                (d.city && d.city.toLowerCase().includes(query)) ||
+                (d.description && d.description.toLowerCase().includes(query))
+            );
+
+            searchDropdown.innerHTML = '';
+            let hasResults = false;
+
+            matchedCountries.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `<strong>📍 Country: ${c}</strong>`;
+                div.onclick = () => {
+                    searchInput.value = c;
+                    searchDropdown.style.display = 'none';
+                    executeSearch();
+                };
+                searchDropdown.appendChild(div);
+                hasResults = true;
+            });
+
+            matchedIndividuals.forEach(m => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `👤 ${m.title} <span style="font-size: 0.8em; color: #aaa;">(${m.city})</span>`;
+                div.onclick = () => {
+                    searchInput.value = m.title;
+                    searchDropdown.style.display = 'none';
+                    executeSearch();
+                };
+                searchDropdown.appendChild(div);
+                hasResults = true;
+            });
+
+            if (hasResults) {
+                searchDropdown.style.display = 'flex';
+            } else {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerText = 'No results found';
+                searchDropdown.appendChild(div);
+                searchDropdown.style.display = 'flex';
+            }
+        }, 300);
+
+        searchInput.addEventListener('input', handleInput);
+
+        // Hide dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#search-container')) {
+                searchDropdown.style.display = 'none';
+            }
+        });
+
+
+    </script>
+
+</body>
+
+</html>
