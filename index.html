@@ -12,13 +12,25 @@
             box-sizing: border-box;
         }
 
+        html,
         body {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            /* Prevents mobile scroll bouncing */
+            background-color: #050510;
+            /* Clean dark fallback */
         }
 
         #globe {
             width: 100vw;
-            height: 100vh;
+            height: 100%;
+            height: 100svh;
+            /* dynamic viewport respects mobile URL bars */
+            touch-action: none;
+            /* Prevents pull-to-refresh over the canvas */
         }
 
         .main-title-container {
@@ -936,7 +948,7 @@
         <!-- TAB NAVIGATION -->
         <div class="drawer-tabs">
             <button class="drawer-tab-btn active" data-tab="filters">🔍 Filters</button>
-            <button class="drawer-tab-btn" data-tab="apcs">APCs List (3/7)</button>
+            <button class="drawer-tab-btn" data-tab="apcs">APCs List</button>
         </div>
 
         <!-- DRAWER CONTENT -->
