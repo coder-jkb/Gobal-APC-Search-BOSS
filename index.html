@@ -8,6 +8,10 @@
     <script src="https://unpkg.com/globe.gl"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
         }
@@ -213,6 +217,7 @@
             font-weight: 500;
         }
 
+        /* SEARCH CONTAINER */
         #search-container {
             position: fixed;
             top: 20px;
@@ -230,41 +235,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             width: 90%;
             max-width: 400px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        #search-dropdown {
-            position: absolute;
-            top: calc(100% + 10px);
-            left: 0;
-            width: 100%;
-            background: rgba(25, 25, 30, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            display: none;
-            flex-direction: column;
-            max-height: 300px;
-            overflow-y: auto;
-            overflow-x: hidden;
-            box-sizing: border-box;
-        }
-
-        #search-dropdown::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #search-dropdown::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-
-        .dropdown-item {
-            padding: 12px 16px;
-            cursor: pointer;
-            color: white;
             font-family: 'Inter', sans-serif;
             font-size: 14px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -311,6 +281,7 @@
             box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
         }
 
+        /* ZOOM CONTROLS */
         #zoom-controls {
             position: fixed;
             bottom: 20px;
@@ -367,67 +338,234 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        /* FILTER PANEL STYLES */
-        #filter-panel {
+        /* ============================================
+           UNIFIED DRAWER SYSTEM (DESKTOP)
+           ============================================ */
+
+        #sidebar-floating-toggle {
             position: fixed;
-            top: 100px;
-            left: 20px;
+            bottom: 100px;
+            right: 20px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: black;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            z-index: 899;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.2s;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sidebar-floating-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        /* DRAWER OVERLAY BACKDROP */
+        #drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            z-index: 899;
+        }
+
+        #drawer-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* UNIFIED DRAWER CONTAINER */
+        #unified-drawer {
+            position: fixed;
             background: rgba(25, 25, 30, 0.95);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 20px;
-            width: 300px;
-            z-index: 950;
             font-family: 'Inter', sans-serif;
             color: white;
+            z-index: 900;
+            display: flex;
+            flex-direction: column;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
-            max-height: calc(100vh - 150px);
-            overflow-y: auto;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        #filter-panel::-webkit-scrollbar {
-            width: 6px;
+        /* DESKTOP LAYOUT (≥768px) */
+        @media (min-width: 768px) {
+            #unified-drawer {
+                left: 20px;
+                top: 100px;
+                width: 340px;
+                max-height: calc(100vh - 140px);
+                border-radius: 16px;
+                transform: translateX(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            #unified-drawer.collapsed {
+                transform: translateX(-380px);
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            #drawer-overlay {
+                display: none;
+            }
+
+            #sidebar-floating-toggle {
+                bottom: 100px;
+                right: 20px;
+                display: flex;
+            }
         }
 
-        #filter-panel::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
+        /* TABLET/MOBILE LAYOUT (<768px) */
+        @media (max-width: 767px) {
+            #unified-drawer {
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 75vh;
+                max-height: 75vh;
+                border-radius: 24px 24px 0 0;
+                transform: translateY(100%);
+                opacity: 0;
+                visibility: hidden;
+            }
+
+            #unified-drawer.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+
+            #sidebar-floating-toggle {
+                bottom: 20px;
+                right: auto;
+                left: 50%;
+                transform: translateX(-50%);
+                width: calc(100% - 40px);
+                max-width: 300px;
+            }
         }
 
-        .filter-header {
+        .drawer-header {
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
         }
 
-        .filter-header h3 {
+        .drawer-header h2 {
             margin: 0;
             font-size: 1rem;
-            font-weight: 700;
+            font-weight: 600;
             background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .filter-toggle-btn {
+        .drawer-close-btn {
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.6);
             cursor: pointer;
-            font-size: 18px;
-            transition: color 0.2s;
+            font-size: 24px;
+            transition: all 0.2s;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
         }
 
-        .filter-toggle-btn:hover {
+        .drawer-close-btn:hover {
             color: white;
         }
 
+        /* TAB SYSTEM */
+        .drawer-tabs {
+            display: flex;
+            gap: 0;
+            background: rgba(0, 0, 0, 0.1);
+            padding: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .drawer-tab-btn {
+            flex: 1;
+            padding: 12px 16px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+            position: relative;
+            border-bottom: 2px solid transparent;
+        }
+
+        .drawer-tab-btn:hover {
+            color: white;
+        }
+
+        .drawer-tab-btn.active {
+            color: #38bdf8;
+            border-bottom-color: #4facfe;
+        }
+
+        /* TAB CONTENT */
+        .drawer-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px;
+        }
+
+        .drawer-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .drawer-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* FILTER STYLES */
         .filter-group {
             margin-bottom: 16px;
             display: flex;
@@ -448,7 +586,7 @@
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: white;
-            padding: 8px 12px;
+            padding: 10px 12px;
             border-radius: 8px;
             font-family: 'Inter', sans-serif;
             font-size: 0.9rem;
@@ -470,13 +608,13 @@
 
         .active-filters {
             margin-bottom: 16px;
-            padding-bottom: 16px;
+            padding-bottom: 12px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .active-filters h4 {
             margin: 0 0 8px 0;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.6);
             text-transform: uppercase;
@@ -525,6 +663,7 @@
             cursor: pointer;
             transition: all 0.2s;
             font-size: 0.85rem;
+            min-height: 44px;
         }
 
         #apply-filters {
@@ -547,26 +686,75 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        /* SIDEBAR/APC LIST STYLES */
+        .apc-item {
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 44px;
+        }
+
+        .apc-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .apc-item.hidden {
+            display: none;
+        }
+
+        .apc-item-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .apc-item-details {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .apc-item-name {
+            font-weight: 500;
+            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .apc-item-city {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         #filter-count {
-            position: absolute;
-            top: 100px;
-            left: 340px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: black;
-            padding: 8px 16px;
-            border-radius: 20px;
+            text-align: center;
+            padding: 12px;
+            background: rgba(79, 172, 254, 0.1);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            border-radius: 8px;
             font-size: 0.85rem;
+            color: #38bdf8;
             font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            z-index: 950;
+            display: none;
+            margin-bottom: 12px;
         }
 
-        #filter-panel.collapsed {
-            transform: translateX(-350px);
-            opacity: 0;
-            pointer-events: none;
+        #filter-count.show {
+            display: block;
         }
 
+        /* RESPONSIVE ADJUSTMENTS */
         @media (max-width: 600px) {
             .main-title-container {
                 top: 15px;
@@ -604,176 +792,31 @@
                 left: 50%;
                 right: auto;
                 transform: translateX(-50%);
-                bottom: 40px;
-                width: max-content;
+                bottom: 80px;
+                width: auto;
+                font-size: 12px;
+                padding: 8px 16px;
             }
 
             #search-container {
-                top: 75px;
+                top: 70px;
                 width: 90%;
-            }
-
-            #sidebar {
-                width: 90%;
-                right: 5%;
-                top: 130px;
-                max-height: calc(100vh - 160px);
-            }
-
-            #filter-panel {
-                top: 130px;
-                left: 10px;
-                width: calc(100% - 20px);
                 max-width: none;
             }
 
-            #filter-count {
-                top: 130px;
-                left: 50%;
-                transform: translateX(-50%);
+            #search-input {
+                font-size: 12px;
             }
 
-            #filter-panel.collapsed {
-                transform: translateY(-400px);
+            .drawer-content {
+                padding: 12px;
             }
-        }
 
-        #sidebar {
-            position: fixed;
-            top: 25%;
-            right: 20px;
-            width: 320px;
-            max-height: calc(100vh - 120px);
-            background: rgba(25, 25, 30, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            font-family: 'Inter', sans-serif;
-            color: white;
-            z-index: 900;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s;
-            overflow: hidden;
-            height: 75%;
-            z-index: 10000;
-        }
-
-        #sidebar.collapsed {
-            transform: translateX(360px);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .sidebar-header {
-            padding: 16px 20px;
-            background: rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 1rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .sidebar-toggle-btn {
-            background: transparent;
-            border: none;
-            color: rgba(255, 255, 255, 0.6);
-            cursor: pointer;
-            font-size: 20px;
-            transition: color 0.2s;
-        }
-
-        .sidebar-toggle-btn:hover {
-            color: white;
-        }
-
-        .sidebar-content {
-            padding: 10px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        .sidebar-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .sidebar-content::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-        }
-
-        .apc-item {
-            padding: 12px 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-bottom: 5px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .apc-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .apc-item.hidden {
-            display: none;
-        }
-
-        .apc-item-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .apc-item-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .apc-item-name {
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .apc-item-city {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        #sidebar-floating-toggle {
-            position: fixed;
-            top: 25%;
-            right: -5px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: black;
-            border: none;
-            padding: 10px 15px 10px 20px;
-            border-radius: 30px 0 0 30px;
-            cursor: pointer;
-            z-index: 899;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s;
-        }
-
-        #sidebar-floating-toggle:hover {
-            transform: translateX(-5px);
+            .filter-group select,
+            .filter-group input {
+                font-size: 14px;
+                padding: 12px;
+            }
         }
     </style>
 </head>
@@ -784,63 +827,6 @@
         <span class="main-subtitle">Global ACP Map</span>
     </div>
 
-    <!-- FILTER PANEL -->
-    <div id="filter-panel">
-        <div class="filter-header">
-            <h3>Filters</h3>
-            <button class="filter-toggle-btn" id="filter-toggle">&times;</button>
-        </div>
-
-        <div class="active-filters" id="active-filters-container" style="display: none;">
-            <h4>Active Filters</h4>
-            <div id="active-filters-list"></div>
-        </div>
-
-        <div class="filter-group">
-            <label for="filter-qualification">Qualification</label>
-            <select id="filter-qualification">
-                <option value="">All Qualifications</option>
-                <option value="B.S. Computer Science">B.S. Computer Science</option>
-                <option value="M.S. Data Science">M.S. Data Science</option>
-                <option value="Ph.D. Artificial Intelligence">Ph.D. Artificial Intelligence</option>
-                <option value="B.A. Graphic Design">B.A. Graphic Design</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="filter-profession">Profession</label>
-            <select id="filter-profession">
-                <option value="">All Professions</option>
-                <option value="Software Engineer">Software Engineer</option>
-                <option value="Data Analyst">Data Analyst</option>
-                <option value="AI Researcher">AI Researcher</option>
-                <option value="UI/UX Lead">UI/UX Lead</option>
-            </select>
-        </div>
-
-        <div class="filter-group">
-            <label for="filter-city">City</label>
-            <input type="text" id="filter-city" placeholder="Search city..." autocomplete="off" />
-        </div>
-
-        <div class="filter-group">
-            <label for="filter-country">Country</label>
-            <select id="filter-country">
-                <option value="">All Countries</option>
-                <option value="USA">USA</option>
-                <option value="India">India</option>
-                <option value="UK">UK</option>
-            </select>
-        </div>
-
-        <div class="filter-buttons">
-            <button class="filter-btn" id="apply-filters">Apply</button>
-            <button class="filter-btn" id="reset-filters">Reset</button>
-        </div>
-    </div>
-
-    <div id="filter-count" style="display: none;">Showing <span id="result-count">0</span> results</div>
-
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Search APC's Name, City or Country..." autocomplete="off" />
         <button id="search-btn">Fly</button>
@@ -848,21 +834,93 @@
     </div>
 
     <div id="zoom-controls">
-        <button id="zoom-out" class="zoom-btn">-</button>
+        <button id="zoom-out" class="zoom-btn">−</button>
         <span id="zoom-level">100%</span>
         <button id="zoom-in" class="zoom-btn">+</button>
-        <button id="zoom-reset">Reset Zoom</button>
+        <button id="zoom-reset">Reset</button>
     </div>
 
-    <button id="sidebar-floating-toggle" onclick="toggleSidebar()">All APCs</button>
+    <!-- UNIFIED DRAWER CONTROL BUTTON -->
+    <button id="sidebar-floating-toggle">☰ Filters & APCs</button>
 
-    <div id="sidebar" class="collapsed">
-        <div class="sidebar-header">
-            <h2>All APCs</h2>
-            <button class="sidebar-toggle-btn" onclick="toggleSidebar()">&times;</button>
+    <!-- DRAWER OVERLAY (mobile/tablet) -->
+    <div id="drawer-overlay"></div>
+
+    <!-- UNIFIED DRAWER PANEL -->
+    <div id="unified-drawer" class="collapsed">
+        <div class="drawer-header">
+            <h2 id="drawer-title">Filters & APCs</h2>
+            <button class="drawer-close-btn" id="drawer-close-btn">&times;</button>
         </div>
-        <div class="sidebar-content" id="apc-list">
-            <!-- Dynamic items go here -->
+
+        <!-- TAB NAVIGATION -->
+        <div class="drawer-tabs">
+            <button class="drawer-tab-btn active" data-tab="filters">🔍 Filters</button>
+            <button class="drawer-tab-btn" data-tab="apcs">👥 All APCs</button>
+        </div>
+
+        <!-- DRAWER CONTENT -->
+        <div class="drawer-content">
+
+            <!-- FILTERS TAB -->
+            <div class="tab-pane active" id="filters-tab">
+                <div id="filter-count"></div>
+
+                <div class="active-filters" id="active-filters-container" style="display: none;">
+                    <h4>Active Filters</h4>
+                    <div id="active-filters-list"></div>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-qualification">Qualification</label>
+                    <select id="filter-qualification">
+                        <option value="">All Qualifications</option>
+                        <option value="B.S. Computer Science">B.S. Computer Science</option>
+                        <option value="M.S. Data Science">M.S. Data Science</option>
+                        <option value="Ph.D. Artificial Intelligence">Ph.D. Artificial Intelligence</option>
+                        <option value="B.A. Graphic Design">B.A. Graphic Design</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-profession">Profession</label>
+                    <select id="filter-profession">
+                        <option value="">All Professions</option>
+                        <option value="Software Engineer">Software Engineer</option>
+                        <option value="Data Analyst">Data Analyst</option>
+                        <option value="AI Researcher">AI Researcher</option>
+                        <option value="UI/UX Lead">UI/UX Lead</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-city">City</label>
+                    <input type="text" id="filter-city" placeholder="Search city..." autocomplete="off" />
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-country">Country</label>
+                    <select id="filter-country">
+                        <option value="">All Countries</option>
+                        <option value="USA">USA</option>
+                        <option value="India">India</option>
+                        <option value="UK">UK</option>
+                    </select>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn" id="apply-filters">Apply</button>
+                    <button class="filter-btn" id="reset-filters">Reset</button>
+                </div>
+            </div>
+
+            <!-- APC LIST TAB -->
+            <div class="tab-pane" id="apcs-tab">
+                <div id="apc-list">
+                    <!-- Dynamic APC items go here -->
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -880,8 +938,7 @@
                 <h3 id="title" class="card-title"></h3>
                 <h4 id="subtitle" class="card-subtitle"></h4>
                 <div class="card-body">
-                    <p id="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tristique neque eget.
-                    </p>
+                    <p id="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tristique neque eget.</p>
                     <ul class="card-info-list">
                         <li><span class="card-info-label">Qualification</span> <span id="qualification"
                                 class="card-info-value"></span></li>
@@ -992,9 +1049,6 @@
             }
         ];
 
-        // ============================================
-        // FILTER STATE MANAGEMENT
-        // ============================================
         let filteredData = [...locations];
         let currentFilters = {
             qualification: '',
@@ -1005,6 +1059,10 @@
 
         const isMobile = window.innerWidth < 600;
         const defaultAltitude = isMobile ? 3.5 : 2.5;
+
+        // ============================================
+        // GLOBE INITIALIZATION
+        // ============================================
 
         const globe = Globe()(document.getElementById('globe'))
             .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
@@ -1086,7 +1144,51 @@
         }, 5000);
 
         // ============================================
-        // FILTERING SYSTEM
+        // DRAWER SYSTEM
+        // ============================================
+
+        const drawer = document.getElementById('unified-drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        const toggleBtn = document.getElementById('sidebar-floating-toggle');
+        const closeBtn = document.getElementById('drawer-close-btn');
+        const tabBtns = document.querySelectorAll('.drawer-tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+
+        toggleBtn.addEventListener('click', () => {
+            drawer.classList.toggle('collapsed');
+            drawer.classList.toggle('active');
+            overlay.classList.toggle('active');
+        });
+
+        closeBtn.addEventListener('click', () => {
+            drawer.classList.add('collapsed');
+            drawer.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        overlay.addEventListener('click', () => {
+            drawer.classList.add('collapsed');
+            drawer.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+
+        // TAB SWITCHING
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tabName = btn.dataset.tab;
+
+                // Remove active class from all tabs
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabPanes.forEach(p => p.classList.remove('active'));
+
+                // Add active class to clicked tab
+                btn.classList.add('active');
+                document.getElementById(tabName + '-tab').classList.add('active');
+            });
+        });
+
+        // ============================================
+        // FILTER SYSTEM
         // ============================================
 
         function applyFilters() {
@@ -1151,14 +1253,14 @@
                 item.classList.toggle('hidden', !filteredData.includes(location));
             });
 
-            // Update result count
             updateResultCount();
         }
 
         function updateResultCount() {
             const count = filteredData.length;
-            document.getElementById('result-count').innerText = count;
-            document.getElementById('filter-count').style.display = count < locations.length ? 'block' : 'none';
+            const countEl = document.getElementById('filter-count');
+            countEl.innerText = `Showing ${count} of ${locations.length} results`;
+            countEl.classList.toggle('show', count < locations.length);
         }
 
         function displayActiveFilters() {
@@ -1196,17 +1298,13 @@
         document.getElementById('apply-filters').addEventListener('click', applyFilters);
         document.getElementById('reset-filters').addEventListener('click', resetFilters);
 
-        // Apply filters on Enter key
         document.getElementById('filter-city').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') applyFilters();
         });
 
         // ============================================
-        // SIDEBAR LOGIC
+        // APC LIST
         // ============================================
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('collapsed');
-        }
 
         const apcListEl = document.getElementById('apc-list');
         locations.forEach((d, index) => {
@@ -1214,7 +1312,7 @@
             item.className = 'apc-item';
             item.dataset.index = index;
             item.innerHTML = `
-                <img class="apc-item-img" src="${d.image}" />
+                <img class="apc-item-img" src="${d.image}" alt="${d.title}" />
                 <div class="apc-item-details">
                     <span class="apc-item-name">${d.title}</span>
                     <span class="apc-item-city">${d.city}, ${d.country}</span>
@@ -1228,7 +1326,12 @@
                     displayPopup(d);
                 }, 1100);
 
-                if (isMobile) toggleSidebar();
+                // Close drawer on mobile after selection
+                if (isMobile) {
+                    drawer.classList.add('collapsed');
+                    drawer.classList.remove('active');
+                    overlay.classList.remove('active');
+                }
             });
             apcListEl.appendChild(item);
         });
@@ -1236,6 +1339,7 @@
         // ============================================
         // SEARCH LOGIC
         // ============================================
+
         function executeSearch() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             if (!query) return;
@@ -1368,14 +1472,6 @@
                 searchDropdown.style.display = 'none';
             }
         });
-
-        // ============================================
-        // FILTER PANEL TOGGLE
-        // ============================================
-        document.getElementById('filter-toggle').addEventListener('click', () => {
-            document.getElementById('filter-panel').classList.toggle('collapsed');
-        });
-
     </script>
 
 </body>
