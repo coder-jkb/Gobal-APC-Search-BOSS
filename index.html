@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOSS - Global ACP Map</title>
     <script src="https://unpkg.com/globe.gl"></script>
@@ -62,6 +63,10 @@
             box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
             animation: pulse 1.5s infinite;
             pointer-events: auto;
+        }
+
+        .pin.hidden {
+            display: none;
         }
 
         @keyframes pulse {
@@ -362,6 +367,206 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        /* FILTER PANEL STYLES */
+        #filter-panel {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(25, 25, 30, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            width: 300px;
+            z-index: 950;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            max-height: calc(100vh - 150px);
+            overflow-y: auto;
+        }
+
+        #filter-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #filter-panel::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .filter-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .filter-toggle-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 18px;
+            transition: color 0.2s;
+        }
+
+        .filter-toggle-btn:hover {
+            color: white;
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(79, 172, 254, 0.5);
+            box-shadow: 0 0 8px rgba(79, 172, 254, 0.2);
+        }
+
+        .filter-group select option {
+            background: #191928;
+            color: white;
+        }
+
+        .active-filters {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .active-filters h4 {
+            margin: 0 0 8px 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.2) 0%, rgba(0, 242, 254, 0.2) 100%);
+            border: 1px solid rgba(79, 172, 254, 0.4);
+            color: #38bdf8;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-badge-remove {
+            cursor: pointer;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+
+        .filter-badge-remove:hover {
+            color: white;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+
+        #apply-filters {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: black;
+        }
+
+        #apply-filters:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        #reset-filters {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        #reset-filters:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        #filter-count {
+            position: absolute;
+            top: 100px;
+            left: 340px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: black;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            z-index: 950;
+        }
+
+        #filter-panel.collapsed {
+            transform: translateX(-350px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
         @media (max-width: 600px) {
             .main-title-container {
                 top: 15px;
@@ -413,6 +618,23 @@
                 right: 5%;
                 top: 130px;
                 max-height: calc(100vh - 160px);
+            }
+
+            #filter-panel {
+                top: 130px;
+                left: 10px;
+                width: calc(100% - 20px);
+                max-width: none;
+            }
+
+            #filter-count {
+                top: 130px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            #filter-panel.collapsed {
+                transform: translateY(-400px);
             }
         }
 
@@ -507,6 +729,10 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
+        .apc-item.hidden {
+            display: none;
+        }
+
         .apc-item-img {
             width: 40px;
             height: 40px;
@@ -557,6 +783,64 @@
         <h1 class="main-title">BOSS</h1>
         <span class="main-subtitle">Global ACP Map</span>
     </div>
+
+    <!-- FILTER PANEL -->
+    <div id="filter-panel">
+        <div class="filter-header">
+            <h3>Filters</h3>
+            <button class="filter-toggle-btn" id="filter-toggle">&times;</button>
+        </div>
+
+        <div class="active-filters" id="active-filters-container" style="display: none;">
+            <h4>Active Filters</h4>
+            <div id="active-filters-list"></div>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-qualification">Qualification</label>
+            <select id="filter-qualification">
+                <option value="">All Qualifications</option>
+                <option value="B.S. Computer Science">B.S. Computer Science</option>
+                <option value="M.S. Data Science">M.S. Data Science</option>
+                <option value="Ph.D. Artificial Intelligence">Ph.D. Artificial Intelligence</option>
+                <option value="B.A. Graphic Design">B.A. Graphic Design</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-profession">Profession</label>
+            <select id="filter-profession">
+                <option value="">All Professions</option>
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="Data Analyst">Data Analyst</option>
+                <option value="AI Researcher">AI Researcher</option>
+                <option value="UI/UX Lead">UI/UX Lead</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-city">City</label>
+            <input type="text" id="filter-city" placeholder="Search city..." autocomplete="off" />
+        </div>
+
+        <div class="filter-group">
+            <label for="filter-country">Country</label>
+            <select id="filter-country">
+                <option value="">All Countries</option>
+                <option value="USA">USA</option>
+                <option value="India">India</option>
+                <option value="UK">UK</option>
+            </select>
+        </div>
+
+        <div class="filter-buttons">
+            <button class="filter-btn" id="apply-filters">Apply</button>
+            <button class="filter-btn" id="reset-filters">Reset</button>
+        </div>
+    </div>
+
+    <div id="filter-count" style="display: none;">Showing <span id="result-count">0</span> results</div>
+
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Search APC's Name, City or Country..." autocomplete="off" />
         <button id="search-btn">Fly</button>
@@ -676,7 +960,7 @@
                 description: "Expert in AI and Machine Learning systems.",
                 qualification: "Ph.D. Artificial Intelligence",
                 profession: "AI Researcher",
-                email: "ravi.patel@example.com",
+                email: "rajesh.patil@example.com",
                 contact: "+91 98765 43210",
                 image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
             },
@@ -689,7 +973,7 @@
                 description: "Expert in AI and Machine Learning systems.",
                 qualification: "Ph.D. Artificial Intelligence",
                 profession: "AI Researcher",
-                email: "ravi.patel@example.com",
+                email: "rohit.kohli@example.com",
                 contact: "+91 98765 43210",
                 image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
             },
@@ -702,11 +986,22 @@
                 description: "Expert in AI and Machine Learning systems.",
                 qualification: "Ph.D. Artificial Intelligence",
                 profession: "AI Researcher",
-                email: "ravi.patel@example.com",
+                email: "sanika.patil@example.com",
                 contact: "+91 98765 43210",
                 image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&q=80"
             }
         ];
+
+        // ============================================
+        // FILTER STATE MANAGEMENT
+        // ============================================
+        let filteredData = [...locations];
+        let currentFilters = {
+            qualification: '',
+            profession: '',
+            city: '',
+            country: ''
+        };
 
         const isMobile = window.innerWidth < 600;
         const defaultAltitude = isMobile ? 3.5 : 2.5;
@@ -716,24 +1011,12 @@
             .htmlElementsData(locations)
             .htmlElement(d => {
                 const el = document.createElement('div');
-
                 el.className = 'pin';
+                el.dataset.index = locations.indexOf(d);
 
-                // IMPORTANT: stop globe drag when clicking pin
                 el.addEventListener('click', (e) => {
                     e.stopPropagation();
-
-                    document.getElementById('title').innerText = d.title;
-                    document.getElementById('subtitle').innerText = d.city;
-                    document.getElementById('desc').innerText = d.description;
-                    document.getElementById('qualification').innerText = d.qualification;
-                    document.getElementById('profession').innerText = d.profession;
-                    document.getElementById('email').innerText = d.email;
-                    document.getElementById('contact').innerText = d.contact;
-                    document.getElementById('popup-image').src = d.image;
-
-                    document.getElementById('popup').classList.add('show');
-
+                    displayPopup(d);
                     globe.pointOfView(
                         { lat: d.lat, lng: d.lng, altitude: 1.2 },
                         800
@@ -746,14 +1029,12 @@
             .htmlLng(d => d.lng)
             .htmlAltitude(0.01);
 
-        // Initialize position based on device
         globe.pointOfView({ altitude: defaultAltitude }, 0);
 
         const controls = globe.controls();
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.5;
 
-        // Manage zoom percentage
         controls.addEventListener('change', () => {
             const currentAlt = globe.pointOfView().altitude;
             let zoomPercent = Math.round((defaultAltitude / currentAlt) * 100);
@@ -764,7 +1045,6 @@
             document.getElementById('zoom-level').innerText = zoomPercent + "%";
         });
 
-        // Zoom buttons
         document.getElementById('zoom-in').addEventListener('click', () => {
             const currentAlt = globe.pointOfView().altitude;
             globe.pointOfView({ altitude: currentAlt * 0.5 }, 500);
@@ -775,14 +1055,12 @@
             globe.pointOfView({ altitude: currentAlt * 1.5 }, 500);
         });
 
-        // Reset Zoom button
         document.getElementById('zoom-reset').addEventListener('click', () => {
             closePopup();
             globe.pointOfView({ altitude: defaultAltitude, lat: 0, lng: 0 }, 1000);
             controls.autoRotate = true;
         });
 
-        // Stop rotation when user interacts
         controls.addEventListener('start', () => {
             controls.autoRotate = false;
         });
@@ -791,19 +1069,150 @@
             document.getElementById('popup').classList.remove('show');
         }
 
+        function displayPopup(d) {
+            document.getElementById('title').innerText = d.title;
+            document.getElementById('subtitle').innerText = d.city;
+            document.getElementById('desc').innerText = d.description;
+            document.getElementById('qualification').innerText = d.qualification;
+            document.getElementById('profession').innerText = d.profession;
+            document.getElementById('email').innerText = d.email;
+            document.getElementById('contact').innerText = d.contact;
+            document.getElementById('popup-image').src = d.image;
+            document.getElementById('popup').classList.add('show');
+        }
+
         setTimeout(() => {
             controls.autoRotate = false;
         }, 5000);
 
-        // Sidebar Logic
+        // ============================================
+        // FILTERING SYSTEM
+        // ============================================
+
+        function applyFilters() {
+            currentFilters.qualification = document.getElementById('filter-qualification').value;
+            currentFilters.profession = document.getElementById('filter-profession').value;
+            currentFilters.city = document.getElementById('filter-city').value.toLowerCase();
+            currentFilters.country = document.getElementById('filter-country').value;
+
+            filteredData = locations.filter(d => {
+                let matches = true;
+
+                if (currentFilters.qualification && d.qualification !== currentFilters.qualification) {
+                    matches = false;
+                }
+                if (currentFilters.profession && d.profession !== currentFilters.profession) {
+                    matches = false;
+                }
+                if (currentFilters.city && !d.city.toLowerCase().includes(currentFilters.city)) {
+                    matches = false;
+                }
+                if (currentFilters.country && d.country !== currentFilters.country) {
+                    matches = false;
+                }
+
+                return matches;
+            });
+
+            updateUI();
+            displayActiveFilters();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-qualification').value = '';
+            document.getElementById('filter-profession').value = '';
+            document.getElementById('filter-city').value = '';
+            document.getElementById('filter-country').value = '';
+
+            currentFilters = {
+                qualification: '',
+                profession: '',
+                city: '',
+                country: ''
+            };
+
+            filteredData = [...locations];
+            updateUI();
+            displayActiveFilters();
+        }
+
+        function updateUI() {
+            // Update Globe Pins
+            const pins = document.querySelectorAll('.pin');
+            pins.forEach((pin, index) => {
+                const location = locations[index];
+                pin.classList.toggle('hidden', !filteredData.includes(location));
+            });
+
+            // Update Sidebar
+            const apcItems = document.querySelectorAll('.apc-item');
+            apcItems.forEach((item, index) => {
+                const location = locations[index];
+                item.classList.toggle('hidden', !filteredData.includes(location));
+            });
+
+            // Update result count
+            updateResultCount();
+        }
+
+        function updateResultCount() {
+            const count = filteredData.length;
+            document.getElementById('result-count').innerText = count;
+            document.getElementById('filter-count').style.display = count < locations.length ? 'block' : 'none';
+        }
+
+        function displayActiveFilters() {
+            const container = document.getElementById('active-filters-list');
+            const filterContainer = document.getElementById('active-filters-container');
+            container.innerHTML = '';
+
+            let hasActiveFilters = false;
+
+            if (currentFilters.qualification) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.qualification} <span class="filter-badge-remove" onclick="clearFilterField('qualification')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+            if (currentFilters.profession) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.profession} <span class="filter-badge-remove" onclick="clearFilterField('profession')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+            if (currentFilters.city) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.city} <span class="filter-badge-remove" onclick="clearFilterField('city')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+            if (currentFilters.country) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.country} <span class="filter-badge-remove" onclick="clearFilterField('country')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+
+            filterContainer.style.display = hasActiveFilters ? 'block' : 'none';
+        }
+
+        function clearFilterField(field) {
+            document.getElementById(`filter-${field}`).value = '';
+            applyFilters();
+        }
+
+        document.getElementById('apply-filters').addEventListener('click', applyFilters);
+        document.getElementById('reset-filters').addEventListener('click', resetFilters);
+
+        // Apply filters on Enter key
+        document.getElementById('filter-city').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+
+        // ============================================
+        // SIDEBAR LOGIC
+        // ============================================
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('collapsed');
         }
 
         const apcListEl = document.getElementById('apc-list');
-        locations.forEach((d) => {
+        locations.forEach((d, index) => {
             const item = document.createElement('div');
             item.className = 'apc-item';
+            item.dataset.index = index;
             item.innerHTML = `
                 <img class="apc-item-img" src="${d.image}" />
                 <div class="apc-item-details">
@@ -816,15 +1225,7 @@
                 globe.pointOfView({ lat: d.lat, lng: d.lng, altitude: 1.2 }, 1000);
 
                 setTimeout(() => {
-                    document.getElementById('title').innerText = d.title;
-                    document.getElementById('subtitle').innerText = d.city;
-                    document.getElementById('desc').innerText = d.description;
-                    document.getElementById('qualification').innerText = d.qualification;
-                    document.getElementById('profession').innerText = d.profession;
-                    document.getElementById('email').innerText = d.email;
-                    document.getElementById('contact').innerText = d.contact;
-                    document.getElementById('popup-image').src = d.image;
-                    document.getElementById('popup').classList.add('show');
+                    displayPopup(d);
                 }, 1100);
 
                 if (isMobile) toggleSidebar();
@@ -832,14 +1233,15 @@
             apcListEl.appendChild(item);
         });
 
-        // Search logic
+        // ============================================
+        // SEARCH LOGIC
+        // ============================================
         function executeSearch() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             if (!query) return;
 
             closePopup();
 
-            // First pass: try matching exactly by country
             const countryMatches = locations.filter(d => d.country && d.country.toLowerCase() === query);
 
             if (countryMatches.length > 0) {
@@ -849,18 +1251,9 @@
                     globe.pointOfView({ lat: match.lat, lng: match.lng, altitude: 1.2 }, 1500);
 
                     setTimeout(() => {
-                        document.getElementById('title').innerText = match.title;
-                        document.getElementById('subtitle').innerText = match.city;
-                        document.getElementById('desc').innerText = match.description;
-                        document.getElementById('qualification').innerText = match.qualification;
-                        document.getElementById('profession').innerText = match.profession;
-                        document.getElementById('email').innerText = match.email;
-                        document.getElementById('contact').innerText = match.contact;
-                        document.getElementById('popup-image').src = match.image;
-                        document.getElementById('popup').classList.add('show');
+                        displayPopup(match);
                     }, 1600);
                 } else {
-                    // Multiple present - fly to average coordinates, don't open popup
                     const avgLat = countryMatches.reduce((sum, d) => sum + d.lat, 0) / countryMatches.length;
                     const avgLng = countryMatches.reduce((sum, d) => sum + d.lng, 0) / countryMatches.length;
                     controls.autoRotate = false;
@@ -869,7 +1262,6 @@
                 return;
             }
 
-            // Standard pass: name or city or description
             const match = locations.find(d =>
                 (d.title && d.title.toLowerCase().includes(query)) ||
                 (d.city && d.city.toLowerCase().includes(query)) ||
@@ -881,15 +1273,7 @@
                 globe.pointOfView({ lat: match.lat, lng: match.lng, altitude: 1.2 }, 1500);
 
                 setTimeout(() => {
-                    document.getElementById('title').innerText = match.title;
-                    document.getElementById('subtitle').innerText = match.city;
-                    document.getElementById('desc').innerText = match.description;
-                    document.getElementById('qualification').innerText = match.qualification;
-                    document.getElementById('profession').innerText = match.profession;
-                    document.getElementById('email').innerText = match.email;
-                    document.getElementById('contact').innerText = match.contact;
-                    document.getElementById('popup-image').src = match.image;
-                    document.getElementById('popup').classList.add('show');
+                    displayPopup(match);
                 }, 1600);
             } else {
                 alert("No locations found matching: " + query);
@@ -911,7 +1295,6 @@
             }
         });
 
-        // Debounce logic for dropdown
         function debounce(func, wait) {
             let timeout;
             return function (...args) {
@@ -980,13 +1363,18 @@
 
         searchInput.addEventListener('input', handleInput);
 
-        // Hide dropdown when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#search-container')) {
                 searchDropdown.style.display = 'none';
             }
         });
 
+        // ============================================
+        // FILTER PANEL TOGGLE
+        // ============================================
+        document.getElementById('filter-toggle').addEventListener('click', () => {
+            document.getElementById('filter-panel').classList.toggle('collapsed');
+        });
 
     </script>
 
