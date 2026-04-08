@@ -280,6 +280,9 @@ const locations = [
             document.getElementById('filter-profession').value = '';
             document.getElementById('filter-city').value = '';
             document.getElementById('filter-country').value = '';
+            
+            // Clear search query
+            document.getElementById('search-input').value = '';
 
             currentFilters = {
                 qualification: '',
@@ -325,6 +328,8 @@ const locations = [
 
             const emptyState = document.getElementById('apc-list-empty');
             const listState = document.getElementById('apc-list');
+            const actionsPanel = document.getElementById('apc-list-actions');
+            
             if (emptyState && listState) {
                 if (count === 0) {
                     emptyState.style.display = 'block';
@@ -333,6 +338,16 @@ const locations = [
                     emptyState.style.display = 'none';
                     listState.style.display = 'block';
                 }
+            }
+            
+            const hasActiveFilter = count < total || document.getElementById('search-input').value.trim() !== '';
+            if (actionsPanel) {
+                actionsPanel.style.display = hasActiveFilter ? 'flex' : 'none';
+            }
+            
+            const clearBtn = document.getElementById('search-clear-btn');
+            if (clearBtn) {
+                clearBtn.style.display = document.getElementById('search-input').value.trim() !== '' ? 'block' : 'none';
             }
         }
 
@@ -377,6 +392,7 @@ const locations = [
 
         document.getElementById('empty-reset-btn').addEventListener('click', resetFilters);
         document.getElementById('empty-modify-btn').addEventListener('click', () => switchTab('filters'));
+        document.getElementById('search-clear-btn').addEventListener('click', resetFilters);
 
         // ============================================
         // APC LIST
@@ -422,6 +438,21 @@ const locations = [
 
             closePopup();
 
+            // Synchronize visual data points with the search query
+            filteredData = locations.filter(d => 
+                (d.title && d.title.toLowerCase().includes(query)) ||
+                (d.city && d.city.toLowerCase().includes(query)) ||
+                (d.country && d.country.toLowerCase() === query) ||
+                (d.description && d.description.toLowerCase().includes(query)) ||
+                (d.profession && d.profession.toLowerCase().includes(query)) ||
+                (d.qualification && d.qualification.toLowerCase().includes(query))
+            );
+            updateUI();
+
+            if (filteredData.length > 0) {
+                switchTab('apcs');
+            }
+
             const countryMatches = locations.filter(d => d.country && d.country.toLowerCase() === query);
 
             if (countryMatches.length > 0) {
@@ -455,8 +486,6 @@ const locations = [
                 setTimeout(() => {
                     displayPopup(match);
                 }, 1600);
-            } else {
-                alert("No locations found matching: " + query);
             }
         }
 
@@ -485,8 +514,12 @@ const locations = [
 
         const handleInput = debounce((e) => {
             const query = e.target.value.toLowerCase().trim();
+            const clearBtn = document.getElementById('search-clear-btn');
+            if (clearBtn) clearBtn.style.display = query ? 'block' : 'none';
+            
             if (!query) {
                 searchDropdown.style.display = 'none';
+                if (filteredData.length !== locations.length) resetFilters();
                 return;
             }
 

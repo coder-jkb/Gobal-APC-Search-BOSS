@@ -5,6 +5,7 @@
 
     <div id="search-container">
         <input type="text" id="search-input" placeholder="Type APC's Name, City or Country..." autocomplete="off" />
+        <span id="search-clear-btn" style="display:none; cursor:pointer; padding: 0 10px; color: rgba(255,255,255,0.6); font-size: 1.5rem; line-height: 1;" title="Clear Search">&times;</span>
         <button id="search-btn">Search</button>
         <div id="search-dropdown"></div>
     </div>
@@ -96,17 +97,18 @@
                     <div
                         style="font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 20px; font-weight: 500;">
                         No APC(s) found</div>
-                    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-                        <button class="filter-btn" id="empty-reset-btn"
-                            style="flex: none; padding: 10px 20px; margin: 0; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);color:#fff">Reset
-                            Filter</button>
-                        <button class="filter-btn" id="empty-modify-btn"
-                            style="flex: none; padding: 10px 20px; margin: 0; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: black; border: none;">Modify
-                            Filter</button>
-                    </div>
                 </div>
                 <div id="apc-list">
                     <!-- Dynamic APC items go here -->
+                </div>
+                <!-- Persistent Actions Container -->
+                <div id="apc-list-actions" style="display: none; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 20px; padding: 0 10px 20px 10px;">
+                    <button class="filter-btn" id="empty-reset-btn"
+                        style="flex: none; padding: 10px 20px; margin: 0; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);color:#fff">Reset
+                        Filter</button>
+                    <button class="filter-btn" id="empty-modify-btn"
+                        style="flex: none; padding: 10px 20px; margin: 0; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: black; border: none;">Modify
+                        Filter</button>
                 </div>
             </div>
 
