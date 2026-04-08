@@ -70,7 +70,7 @@
         }
 
         .pin.hidden {
-            display: none !important;
+            display: none;
         }
 
         @keyframes pulse {
@@ -447,6 +447,22 @@
             #drawer-overlay {
                 display: none;
             }
+
+            #sidebar-floating-toggle {
+                bottom: auto;
+                top: 100px;
+                left: 20px;
+                transform: none;
+                width: auto;
+                max-width: none;
+                display: flex;
+            }
+
+            #sidebar-floating-toggle.hidden-desktop {
+                opacity: 0;
+                pointer-events: none;
+                visibility: hidden;
+            }
         }
 
         /* UNIFIED DRAWER CONTAINER */
@@ -465,21 +481,21 @@
             transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
 
-        /* DESKTOP LAYOUT (≥768px) - Always Visible */
+        /* DESKTOP LAYOUT (≥768px) - Closable */
         @media (min-width: 768px) {
             #unified-drawer {
                 left: 20px;
                 top: 100px;
                 width: 340px;
-                max-height: calc(100vh - 140px);
+                max-height: calc(100vh - 100px);
                 border-radius: 16px;
-                transform: translateX(0);
-                opacity: 1;
-                visibility: visible;
-                pointer-events: auto;
+                transform: translateX(-400px);
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
             }
 
-            #unified-drawer.collapsed {
+            #unified-drawer.active {
                 transform: translateX(0);
                 opacity: 1;
                 visibility: visible;
@@ -519,7 +535,7 @@
         }
 
         .drawer-header {
-            padding: 16px 20px;
+            padding: 8px 16px;
             background: rgba(0, 0, 0, 0.2);
             display: flex;
             justify-content: space-between;
@@ -545,7 +561,6 @@
             cursor: pointer;
             font-size: 24px;
             transition: all 0.2s;
-            padding: 4px 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -557,10 +572,10 @@
             color: white;
         }
 
-        /* DESKTOP: Hide close button (always visible) */
+        /* DESKTOP: Close button visible */
         @media (min-width: 768px) {
             .drawer-close-btn {
-                display: none;
+                display: flex;
             }
         }
 
@@ -583,7 +598,7 @@
 
         .drawer-tab-btn {
             flex: 1;
-            padding: 12px 16px;
+            padding: 8px;
             background: transparent;
             border: none;
             color: rgba(255, 255, 255, 0.6);
@@ -632,7 +647,7 @@
 
         /* FILTER STYLES */
         .filter-group {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -769,7 +784,7 @@
         }
 
         .apc-item.hidden {
-            display: none !important;
+            display: none;
         }
 
         .apc-item-img {
@@ -794,7 +809,7 @@
             white-space: nowrap;
         }
 
-        .apc-item-city {
+        .apc-item-details {
             font-size: 0.8rem;
             color: rgba(255, 255, 255, 0.6);
             overflow: hidden;
@@ -893,8 +908,8 @@
     </div>
 
     <div id="search-container">
-        <input type="text" id="search-input" placeholder="Search APC's Name, City or Country..." autocomplete="off" />
-        <button id="search-btn">Fly</button>
+        <input type="text" id="search-input" placeholder="Type APC's Name, City or Country..." autocomplete="off" />
+        <button id="search-btn">Search</button>
         <div id="search-dropdown"></div>
     </div>
 
@@ -921,7 +936,7 @@
         <!-- TAB NAVIGATION -->
         <div class="drawer-tabs">
             <button class="drawer-tab-btn active" data-tab="filters">🔍 Filters</button>
-            <button class="drawer-tab-btn" data-tab="apcs">👥 All APCs</button>
+            <button class="drawer-tab-btn" data-tab="apcs">APCs List (3/7)</button>
         </div>
 
         <!-- DRAWER CONTENT -->
@@ -981,6 +996,19 @@
 
             <!-- APC LIST TAB -->
             <div class="tab-pane" id="apcs-tab">
+                <div id="apc-list-empty" style="display: none; text-align: center; padding: 40px 20px;">
+                    <div
+                        style="font-size: 1.1rem; color: rgba(255,255,255,0.7); margin-bottom: 20px; font-weight: 500;">
+                        No APC(s) found</div>
+                    <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+                        <button class="filter-btn" id="empty-reset-btn"
+                            style="flex: none; padding: 10px 20px; margin: 0; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);color:#fff">Reset
+                            Filter</button>
+                        <button class="filter-btn" id="empty-modify-btn"
+                            style="flex: none; padding: 10px 20px; margin: 0; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: black; border: none;">Modify
+                            Filter</button>
+                    </div>
+                </div>
                 <div id="apc-list">
                     <!-- Dynamic APC items go here -->
                 </div>
@@ -1003,7 +1031,8 @@
                 <h3 id="title" class="card-title"></h3>
                 <h4 id="subtitle" class="card-subtitle"></h4>
                 <div class="card-body">
-                    <p id="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tristique neque eget.</p>
+                    <p id="desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi tristique neque eget.
+                    </p>
                     <ul class="card-info-list">
                         <li><span class="card-info-label">Qualification</span> <span id="qualification"
                                 class="card-info-value"></span></li>
@@ -1135,7 +1164,7 @@
             .htmlElement(d => {
                 const el = document.createElement('div');
                 el.className = 'pin';
-                el.dataset.title = d.title;
+                el.dataset.index = locations.indexOf(d);
 
                 el.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1220,30 +1249,39 @@
         const tabPanes = document.querySelectorAll('.tab-pane');
 
         toggleBtn.addEventListener('click', () => {
-            drawer.classList.toggle('active');
-            overlay.classList.toggle('active');
+            drawer.classList.add('active');
+            if (window.innerWidth < 768) {
+                overlay.classList.add('active');
+            } else {
+                toggleBtn.classList.add('hidden-desktop');
+            }
         });
 
-        closeBtn.addEventListener('click', () => {
+        function closeDrawer() {
             drawer.classList.remove('active');
             overlay.classList.remove('active');
-        });
+            if (window.innerWidth >= 768) toggleBtn.classList.remove('hidden-desktop');
+        }
 
-        overlay.addEventListener('click', () => {
-            drawer.classList.remove('active');
-            overlay.classList.remove('active');
-        });
+        closeBtn.addEventListener('click', closeDrawer);
+        overlay.addEventListener('click', closeDrawer);
 
-        // TAB SWITCHING FUNCTION
+        // Initial state for desktop default open
+        if (window.innerWidth >= 768) {
+            drawer.classList.add('active');
+            toggleBtn.classList.add('hidden-desktop');
+        }
+
+        // TAB SWITCHING
         function switchTab(tabName) {
             tabBtns.forEach(b => b.classList.remove('active'));
             tabPanes.forEach(p => p.classList.remove('active'));
-
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            document.getElementById(tabName + '-tab').classList.add('active');
+            const btn = document.querySelector(`.drawer-tab-btn[data-tab="${tabName}"]`);
+            if (btn) btn.classList.add('active');
+            const pane = document.getElementById(tabName + '-tab');
+            if (pane) pane.classList.add('active');
         }
 
-        // TAB CLICKING
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 switchTab(btn.dataset.tab);
@@ -1258,8 +1296,33 @@
             currentFilters.qualification = document.getElementById('filter-qualification').value;
             currentFilters.profession = document.getElementById('filter-profession').value;
             currentFilters.city = document.getElementById('filter-city').value.toLowerCase();
-            currentFilters.country = document.getElementById('filter-country TOCs TAB AFTER APPLYING FILTERS
-            switchTab('apcs');
+            currentFilters.country = document.getElementById('filter-country').value;
+
+            filteredData = locations.filter(d => {
+                let matches = true;
+
+                if (currentFilters.qualification && d.qualification !== currentFilters.qualification) {
+                    matches = false;
+                }
+                if (currentFilters.profession && d.profession !== currentFilters.profession) {
+                    matches = false;
+                }
+                if (currentFilters.city && !d.city.toLowerCase().includes(currentFilters.city)) {
+                    matches = false;
+                }
+                if (currentFilters.country && d.country !== currentFilters.country) {
+                    matches = false;
+                }
+
+                return matches;
+            });
+
+            updateUI();
+            displayActiveFilters();
+
+            if (filteredData.length > 0) {
+                switchTab('apcs');
+            }
         }
 
         function resetFilters() {
@@ -1281,28 +1344,105 @@
         }
 
         function updateUI() {
-            // UPDATE GLOBE PINS - RECREATE THE DATA TO REFRESH GLOBE
-            globe.htmlElementsData(filteredData);
+            // Update Globe Pins
+            const pins = document.querySelectorAll('.pin');
+            pins.forEach(pin => {
+                const location = locations[pin.dataset.index];
+                if (location) pin.classList.toggle('hidden', !filteredData.includes(location));
+            });
 
-            // UPDATE SIDEBAR
+            // Update Sidebar
             const apcItems = document.querySelectorAll('.apc-item');
-            apcItems.forEach((item) => {
-                const title = item.querySelector('.apc-item-name').innerText;
-                const location = locations.find(l => l.title === title);
-                item.classList.toggle('hidden', !filteredData.includes(location));
+            apcItems.forEach(item => {
+                const location = locations[item.dataset.index];
+                if (location) item.classList.toggle('hidden', !filteredData.includes(location));
             });
 
             updateResultCount();
         }
 
-        function update
+        function updateResultCount() {
+            const count = filteredData.length;
+            const total = locations.length;
+            const countEl = document.getElementById('filter-count');
+            countEl.innerText = `Showing ${count} of ${total} results`;
+            countEl.classList.toggle('show', count < total);
+
+            const apcTabBtn = document.querySelector('.drawer-tab-btn[data-tab="apcs"]');
+            if (apcTabBtn) {
+                apcTabBtn.innerText = `APCs List (${count}/${total})`;
+            }
+
+            const emptyState = document.getElementById('apc-list-empty');
+            const listState = document.getElementById('apc-list');
+            if (emptyState && listState) {
+                if (count === 0) {
+                    emptyState.style.display = 'block';
+                    listState.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'none';
+                    listState.style.display = 'block';
+                }
+            }
+        }
+
+        function displayActiveFilters() {
+            const container = document.getElementById('active-filters-list');
+            const filterContainer = document.getElementById('active-filters-container');
+            container.innerHTML = '';
+
+            let hasActiveFilters = false;
+
+            if (currentFilters.qualification) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.qualification} <span class="filter-badge-remove" onclick="clearFilterField('qualification')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+            if (currentFilters.profession) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.profession} <span class="filter-badge-remove" onclick="clearFilterField('profession')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+            if (currentFilters.city) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.city} <span class="filter-badge-remove" onclick="clearFilterField('city')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+            if (currentFilters.country) {
+                container.innerHTML += `<div class="filter-badge">${currentFilters.country} <span class="filter-badge-remove" onclick="clearFilterField('country')">×</span></div>`;
+                hasActiveFilters = true;
+            }
+
+            filterContainer.style.display = hasActiveFilters ? 'block' : 'none';
+        }
+
+        function clearFilterField(field) {
+            document.getElementById(`filter-${field}`).value = '';
+            applyFilters();
+        }
+
+        document.getElementById('apply-filters').addEventListener('click', applyFilters);
+        document.getElementById('reset-filters').addEventListener('click', resetFilters);
+
+        document.getElementById('filter-city').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') applyFilters();
+        });
+
+        document.getElementById('empty-reset-btn').addEventListener('click', resetFilters);
+        document.getElementById('empty-modify-btn').addEventListener('click', () => switchTab('filters'));
+
+        // ============================================
+        // APC LIST
+        // ============================================
+
+        const apcListEl = document.getElementById('apc-list');
+        locations.forEach((d, index) => {
+            const item = document.createElement('div');
             item.className = 'apc-item';
             item.dataset.index = index;
             item.innerHTML = `
                 <img class="apc-item-img" src="${d.image}" alt="${d.title}" />
                 <div class="apc-item-details">
                     <span class="apc-item-name">${d.title}</span>
-                    <span class="apc-item-city">${d.city}, ${d.country}</span>
+                    <span class="apc-item-details">${d.profession} | ${d.city}, ${d.country}</span>
+                    <span class="apc-item-details">${d.qualification}</span>
                 </div>
             `;
             item.addEventListener('click', () => {
@@ -1459,7 +1599,6 @@
             }
         });
     </script>
-
 </body>
 
 </html>
