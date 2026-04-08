@@ -70,7 +70,7 @@
         }
 
         .pin.hidden {
-            display: none;
+            display: none !important;
         }
 
         @keyframes pulse {
@@ -769,7 +769,7 @@
         }
 
         .apc-item.hidden {
-            display: none;
+            display: none !important;
         }
 
         .apc-item-img {
@@ -1135,7 +1135,7 @@
             .htmlElement(d => {
                 const el = document.createElement('div');
                 el.className = 'pin';
-                el.dataset.index = locations.indexOf(d);
+                el.dataset.title = d.title;
 
                 el.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1234,18 +1234,19 @@
             overlay.classList.remove('active');
         });
 
-        // TAB SWITCHING
+        // TAB SWITCHING FUNCTION
+        function switchTab(tabName) {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
+
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // TAB CLICKING
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
-                const tabName = btn.dataset.tab;
-
-                // Remove active class from all tabs
-                tabBtns.forEach(b => b.classList.remove('active'));
-                tabPanes.forEach(p => p.classList.remove('active'));
-
-                // Add active class to clicked tab
-                btn.classList.add('active');
-                document.getElementById(tabName + '-tab').classList.add('active');
+                switchTab(btn.dataset.tab);
             });
         });
 
@@ -1257,29 +1258,8 @@
             currentFilters.qualification = document.getElementById('filter-qualification').value;
             currentFilters.profession = document.getElementById('filter-profession').value;
             currentFilters.city = document.getElementById('filter-city').value.toLowerCase();
-            currentFilters.country = document.getElementById('filter-country').value;
-
-            filteredData = locations.filter(d => {
-                let matches = true;
-
-                if (currentFilters.qualification && d.qualification !== currentFilters.qualification) {
-                    matches = false;
-                }
-                if (currentFilters.profession && d.profession !== currentFilters.profession) {
-                    matches = false;
-                }
-                if (currentFilters.city && !d.city.toLowerCase().includes(currentFilters.city)) {
-                    matches = false;
-                }
-                if (currentFilters.country && d.country !== currentFilters.country) {
-                    matches = false;
-                }
-
-                return matches;
-            });
-
-            updateUI();
-            displayActiveFilters();
+            currentFilters.country = document.getElementById('filter-country TOCs TAB AFTER APPLYING FILTERS
+            switchTab('apcs');
         }
 
         function resetFilters() {
@@ -1301,76 +1281,21 @@
         }
 
         function updateUI() {
-            // Update Globe Pins
-            const pins = document.querySelectorAll('.pin');
-            pins.forEach((pin, index) => {
-                const location = locations[index];
-                pin.classList.toggle('hidden', !filteredData.includes(location));
-            });
+            // UPDATE GLOBE PINS - RECREATE THE DATA TO REFRESH GLOBE
+            globe.htmlElementsData(filteredData);
 
-            // Update Sidebar
+            // UPDATE SIDEBAR
             const apcItems = document.querySelectorAll('.apc-item');
-            apcItems.forEach((item, index) => {
-                const location = locations[index];
+            apcItems.forEach((item) => {
+                const title = item.querySelector('.apc-item-name').innerText;
+                const location = locations.find(l => l.title === title);
                 item.classList.toggle('hidden', !filteredData.includes(location));
             });
 
             updateResultCount();
         }
 
-        function updateResultCount() {
-            const count = filteredData.length;
-            const countEl = document.getElementById('filter-count');
-            countEl.innerText = `Showing ${count} of ${locations.length} results`;
-            countEl.classList.toggle('show', count < locations.length);
-        }
-
-        function displayActiveFilters() {
-            const container = document.getElementById('active-filters-list');
-            const filterContainer = document.getElementById('active-filters-container');
-            container.innerHTML = '';
-
-            let hasActiveFilters = false;
-
-            if (currentFilters.qualification) {
-                container.innerHTML += `<div class="filter-badge">${currentFilters.qualification} <span class="filter-badge-remove" onclick="clearFilterField('qualification')">×</span></div>`;
-                hasActiveFilters = true;
-            }
-            if (currentFilters.profession) {
-                container.innerHTML += `<div class="filter-badge">${currentFilters.profession} <span class="filter-badge-remove" onclick="clearFilterField('profession')">×</span></div>`;
-                hasActiveFilters = true;
-            }
-            if (currentFilters.city) {
-                container.innerHTML += `<div class="filter-badge">${currentFilters.city} <span class="filter-badge-remove" onclick="clearFilterField('city')">×</span></div>`;
-                hasActiveFilters = true;
-            }
-            if (currentFilters.country) {
-                container.innerHTML += `<div class="filter-badge">${currentFilters.country} <span class="filter-badge-remove" onclick="clearFilterField('country')">×</span></div>`;
-                hasActiveFilters = true;
-            }
-
-            filterContainer.style.display = hasActiveFilters ? 'block' : 'none';
-        }
-
-        function clearFilterField(field) {
-            document.getElementById(`filter-${field}`).value = '';
-            applyFilters();
-        }
-
-        document.getElementById('apply-filters').addEventListener('click', applyFilters);
-        document.getElementById('reset-filters').addEventListener('click', resetFilters);
-
-        document.getElementById('filter-city').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') applyFilters();
-        });
-
-        // ============================================
-        // APC LIST
-        // ============================================
-
-        const apcListEl = document.getElementById('apc-list');
-        locations.forEach((d, index) => {
-            const item = document.createElement('div');
+        function update
             item.className = 'apc-item';
             item.dataset.index = index;
             item.innerHTML = `
